@@ -1,5 +1,8 @@
 'use strict';
 
+var timeutil = require('./timeutil');
+var translateFromMinutesToTime = timeutil.translateFromMinutesToTime;
+var translateTimeInMinutes = timeutil.translateTimeInMinutes;
 var moment = require('./moment');
 const day = 24 * 60;
 const hours = 60;
@@ -25,67 +28,84 @@ const bankName = 'bank';
 
 
 function compareElem(a, b){
-    return a.time[0] - b.time[0];
+    return a.time.timeInMinutes - b.time.timeInMinutes;
 }
 
 // Выбирает подходящий ближайший момент начала ограбления
 module.exports.getAppropriateMoment = function (json, minDuration, workingHours) {
-
     var appropriateMoment = moment();
+    //здесь будем хранить все времена, которые мы имеем
     var allTimes = [];
     var i;
     var data = JSON.parse(json);
+    //здесь будет количество всех людей, которые хотят грабить банк
     var allAmount = 0;
     for (var key in data) if (data.hasOwnProperty(key)){
         var inStringData = [];
         allAmount ++;
         for (i in data[key]) {
             //собираем все края отрезков времени
+            //меняем их значимость, т е выбираем свободные отрезки
             allTimes.push({
-                time: translateTimeInSeconds(data[key][i].to),
+                time: translateTimeInMinutes(data[key][i].from),
                 type: typeTime.to,
                 name: key
             });
             allTimes.push({
-                time: translateTimeInSeconds(data[key][i].from),
+                time: translateTimeInMinutes(data[key][i].to),
                 type: typeTime.from,
                 name: key
             });
         }
     }
-    var translatedTimeFrom = translateTimeInSeconds(workingHours.from);
-    var translatedTimeTo = translateTimeInSeconds(workingHours.to);
+    //для банка вычисляем время в минутах
+    var translatedTimeFrom = translateTimeInMinutes(workingHours.from);
+    var translatedTimeTo = translateTimeInMinutes(workingHours.to);
 
+    //вычисляем время в три дня
     for (i = 0; i < amountDays; i++) {
         allTimes.push( {
-            time: [translatedTimeTo[0] + i * day,
-                   translatedTimeTo[1],
-                   daysOfWeek[i] + translatedTimeTo[2]],
+            time: {
+                minutesInTime: translatedTimeTo.minutesInTime + i * day,
+                days: daysOfWeek[i],
+                hours: translatedTimeTo.hours,
+                minuts: translatedTimeTo.minuts,
+                timeInString: translatedTimeTo.timeInString
+            },
             type: typeTime.to,
             name: bankName
         });
         allTimes.push({
-            time: [translatedTimeFrom[0] + i * day,
-                   translatedTimeFrom[1],
-                   daysOfWeek[i] + translatedTimeFrom[2]],
+            time: {
+                minutesInTime: translatedTimeFrom.minutesInTime + i * day,
+                days: daysOfWeek[i],
+                hours: translatedTimeFrom.hours,
+                minuts: translatedTimeFrom.minuts,
+                timeInString: translatedTimeFrom.timeInString
+            },
             type: typeTime.from,
             name: bankName
-        })
+        });
     }
+    //значально считаем, что все могут, кроме банка
+    var allWhoCan = allAmount;
+    //добавляем банк
     allAmount ++;
+    //сортируем все времена
     allTimes.sort(compareElem);
     var lastTime = 0;
-    var allWhoCan = 4;
+
     var flagAll = false;
     var set = new Set();
     for (i in allTimes) {
-        if (allTimes[i].type == 1) {
+        console.log(set);
+        if (allTimes[i].type == typeTime.to) {
             allWhoCan++;
             set.add(allTimes[i].name);
         } else {
             allWhoCan--;
             if (flagAll){
-                if (allTimes[i].time[0] - lastTime[0] >= minDuration){
+                if (allTimes[i].time.timeInMinutes - lastTime.timeInMinutes >= minDuration){
                     break;
                 }
                 flagAll = false;
@@ -98,9 +118,9 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
         }
     }
     //дата полученная по гринвичу
-    appropriateMoment.date = translateFromMinutesToTime(lastTime[0]);
-    appropriateMoment.timezone = lastTime[1];
-    console.log(appropriateMoment);
+    console.log(lastTime, 'lastTime');
+    appropriateMoment.date = lastTime.timeInString;
+    appropriateMoment.timezone = 5;
 
     return appropriateMoment;
 };
@@ -113,44 +133,3 @@ module.exports.getStatus = function (moment, robberyMoment) {
     }
     return 'Ограбление уже идёт!';
 };
-
-function translateTimeInSeconds(dateString){
-    var regDate = /^([А-Я]{2})? ?([0-9]{2}):([0-9]{2})(.*)$/;
-    var dateArray = dateString.match(regDate);
-    //получение даты, Пн 00:00, если отрицательное, то надо прибавить неделю
-    //время местное
-    if (dateArray[1] !== undefined)
-    {
-        var date = days[dateArray[1]] + parseInt(dateArray[2]) * hours + parseInt(dateArray[3]);
-    }
-    else
-    {
-        var date = parseInt(dateArray[2]) * hours + parseInt(dateArray[3]);
-    }
-
-
-    if (dateArray[4] !== undefined) {
-        date -= parseInt(dateArray[4])*hours;
-    }
-    if (date < 0)
-    {
-        date += week;
-    }
-    return [date, dateArray[4], dateString];
-};
-
-function translateFromMinutesToTime(minutes){
-    //(x-x%y)/y
-    var ourMinuts = minutes % hours;
-    minutes -= ourMinuts;
-    var ourHours = (minutes % day);
-    minutes -= ourHours;
-    var ourDays = minutes / day;
-    ourHours = ourHours / hours;
-
-
-    return {
-        days: daysOfWeek[ourDays],
-        hours: ourHours,
-        minuts: ourMinuts};
-}
