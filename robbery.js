@@ -15,7 +15,7 @@ var typeTime = {
 const bankName = 'bank';
 
 
-function compareElem (a, b) {
+function compareElem(a, b) {
     return a.time.minutesInTime - b.time.minutesInTime;
 }
 
@@ -44,7 +44,7 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
                 name: name
             });
         }
-});
+    });
     //для банка вычисляем время в минутах
     var translatedTimeFrom = translateTimeInMinutes(workingHours.from);
     var translatedTimeTo = translateTimeInMinutes(workingHours.to);
