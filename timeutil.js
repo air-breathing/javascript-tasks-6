@@ -18,7 +18,7 @@ var daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 const amountDays = 3;
 const week = day * amountDays;
 
-function translateFromMinutesToTime (minutes) {
+function translateFromMinutesToTime(minutes) {
     var minutes2 = minutes;
     var ourMinuts = minutes % hours;
     minutes -= ourMinuts;
@@ -41,7 +41,7 @@ function translateFromMinutesToTime (minutes) {
     };
 }
 
-function translateTimeInMinutes (dateString) {
+function translateTimeInMinutes(dateString) {
     var regDate = /^([А-Я]{2})? ?([0-9]{2}):([0-9]{2})(.*)$/;
     var dateArray = dateString.match(regDate);
     var day = dateArray[1];
@@ -73,13 +73,13 @@ function translateFromMinutesToTimeWithTimeZone(minutes, timezone) {
     return result;
 }
 
-function getTimeZone (value) {
+function getTimeZone(value) {
     var regDate = /^([А-Я]{2})? ?([0-9]{2}):([0-9]{2})(.*)$/;
     var dateArray = value.match(regDate);
     return parseInt(dateArray[4]);
 }
 
-function getDifference (value1, value2) {
+function getDifference(value1, value2) {
     var difference = translateFromMinutesToTime(
         value1.minutesInTime - value2.minutesInTime);
     var result = 'До ограбления ';
@@ -135,8 +135,7 @@ function getDifference (value1, value2) {
     }
     switch (difference.minuts) {
         case 0:
-            if (!presenceLeft)
-            {
+            if (!presenceLeft) {
                 result += 'времени не осталось';
             }
             break;
@@ -145,8 +144,7 @@ function getDifference (value1, value2) {
         case 31:
         case 41:
         case 51:
-            if (!presenceLeft)
-            {
+            if (!presenceLeft) {
                 result += 'осталась';
             }
             result += difference.minuts + ' минута';
