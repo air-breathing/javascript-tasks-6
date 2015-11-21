@@ -57,7 +57,7 @@ module.exports = function () {
     };
 };
 
-function getGoodStringOfTime (timeInNumber, timezone) {
+function getGoodStringOfTime(timeInNumber, timezone) {
     var result = '';
     result += timeInNumber;
     if (result.length <= 1) {
