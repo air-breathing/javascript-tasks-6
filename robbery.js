@@ -89,7 +89,8 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
                 setNamesWhoCans.add(allTimes[index].name);
             } else {
                 if (flagAll) {
-                    if (allTimes[index].time.minutesInTime - lastTime.minutesInTime >= minDuration) {
+                    if (allTimes[index].time.minutesInTime - lastTime.minutesInTime >=
+                        minDuration) {
                         break;
                     }
                     flagAll = false;
