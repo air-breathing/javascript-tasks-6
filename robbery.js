@@ -15,7 +15,7 @@ var typeTime = {
 const bankName = 'bank';
 
 
-function compareElem(a, b){
+function compareElem (a, b) {
     return a.time.minutesInTime - b.time.minutesInTime;
 }
 
@@ -25,28 +25,26 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
     var allTimes = [];
     var i;
     var data = JSON.parse(json);
-    //здесь будет количество всех людей, которые хотят грабить банк
     var allAmount = 0;
-    var set = new Set();
-    for (var key in data) if (data.hasOwnProperty(key)){
-        var inStringData = [];
+    var setNamesWhoCans = new Set();
+    var name;
+    Object.keys(data).forEach(name => {
         allAmount ++;
-        set.add(key);
-        for (i in data[key]) {
-            //собираем все края отрезков времени
-            //меняем их значимость, т е выбираем свободные отрезки
+        setNamesWhoCans.add(name);
+        var i;
+        for (i in data[name]) {
             allTimes.push({
-                time: translateTimeInMinutes(data[key][i].from),
+                time: translateTimeInMinutes(data[name][i].from),
                 type: typeTime.to,
-                name: key
+                name: name
             });
             allTimes.push({
-                time: translateTimeInMinutes(data[key][i].to),
+                time: translateTimeInMinutes(data[name][i].to),
                 type: typeTime.from,
-                name: key
+                name: name
             });
         }
-    }
+});
     //для банка вычисляем время в минутах
     var translatedTimeFrom = translateTimeInMinutes(workingHours.from);
     var translatedTimeTo = translateTimeInMinutes(workingHours.to);
@@ -65,7 +63,7 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
             type: typeTime.from,
             name: bankName
         });
-        allTimes.push( {
+        allTimes.push({
             time: {
                 minutesInTime: translatedTimeTo.minutesInTime + i * day,
                 days: daysOfWeek[i],
@@ -85,22 +83,24 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
     allTimes.sort(compareElem);
     var lastTime = 0;
     var flagAll = false;
-    for (var index in allTimes) if (allTimes.hasOwnProperty(index)) {
-        if (allTimes[index].type == typeTime.from) {
-            set.add(allTimes[index].name);
-        } else {
-            if (flagAll){
-                if (allTimes[index].time.minutesInTime - lastTime.minutesInTime >= minDuration){
-                    break;
+    for (var index in allTimes) {
+        if (allTimes.hasOwnProperty(index)) {
+            if (allTimes[index].type == typeTime.from) {
+                setNamesWhoCans.add(allTimes[index].name);
+            } else {
+                if (flagAll) {
+                    if (allTimes[index].time.minutesInTime - lastTime.minutesInTime >= minDuration) {
+                        break;
+                    }
+                    flagAll = false;
                 }
-                flagAll = false;
+                setNamesWhoCans.delete(allTimes[index].name);
             }
-            set.delete(allTimes[index].name);
-        }
-        if (set.size == allAmount){
+            if (setNamesWhoCans.size == allAmount) {
 
-            lastTime = allTimes[index].time;
-            flagAll = true;
+                lastTime = allTimes[index].time;
+                flagAll = true;
+            }
         }
     }
     //дата полученная по гринвичу
