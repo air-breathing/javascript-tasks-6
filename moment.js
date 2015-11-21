@@ -21,18 +21,19 @@ module.exports = function () {
 
         // А здесь часовой пояс
         dateInOurTimezone: null,
-        timezoneNumber:null,
+        timezoneNumber: null,
         get timezone() {
             return this.timezoneNumber;
         },
         set timezone(value) {
             this.timezoneNumber = value;
-            this.dateInOurTimezone = translateFromMinutesToTimeWithTimeZone(this.dateInGrinvich.minutesInTime, value);
+            this.dateInOurTimezone = translateFromMinutesToTimeWithTimeZone(
+                this.dateInGrinvich.minutesInTime, value);
         },
 
         // Выводит дату в переданном формате
         format: function (pattern) {
-            if (this.dateInGrinvich == null){
+            if (this.dateInGrinvich == null) {
                 console.log('Дата не инициализирована');
                 return;
             }
@@ -45,7 +46,7 @@ module.exports = function () {
             pattern = pattern.split('%MM');
             pattern = pattern.join(getGoodStringOfTime(this.dateInOurTimezone.minuts));
 
-            return pattern
+            return pattern;
         },
 
         // Возвращает кол-во времени между текущей датой и переданной `moment`
@@ -56,10 +57,10 @@ module.exports = function () {
     };
 };
 
-function getGoodStringOfTime(timeInNumber, timezone){
-    var result = timeInNumber + '';
-    if (result.length <= 1)
-    {
+function getGoodStringOfTime (timeInNumber, timezone) {
+    var result = '';
+    result += timeInNumber;
+    if (result.length <= 1) {
         return '0' + result;
     }
     return result;
