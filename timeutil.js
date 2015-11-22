@@ -145,7 +145,7 @@ function getDifference(value1, value2) {
         case 41:
         case 51:
             if (!presenceLeft) {
-                result += 'осталась';
+                result += 'осталась ';
             }
             result += difference.minuts + ' минута';
             break;
