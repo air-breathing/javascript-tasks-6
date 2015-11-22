@@ -175,7 +175,6 @@ function getDifference(value1, value2) {
             }
             result += difference.minuts + ' минут';
     }
-
     return result;
 }
 
